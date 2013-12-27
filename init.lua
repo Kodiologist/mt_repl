@@ -2,8 +2,8 @@ require 'posix'
 inspect = require 'inspect'
 
 local RC_FILE = os.getenv('HOME') .. '/.mt_replrc'
-local TO_REPL_FIFO = 'fifo_mt_to_repl'
-local FROM_REPL_FIFO = 'fifo_repl_to_mt'
+local TO_REPL_FIFO = os.getenv 'MT_REPL_FIFO_MT_TO_REPL'
+local FROM_REPL_FIFO = os.getenv 'MT_REPL_FIFO_REPL_TO_MT'
 
 -----------------------------------------------------------------
 -- * Subroutines
@@ -32,7 +32,7 @@ local function encode_reply(chunk, errmsg)
     return reply .. '\n'
 end
 
-local function setup_repl(fifo_dir)
+local function setup_repl()
 
     note('Loading rc file: ' .. RC_FILE)
     chunk, errmsg = loadfile(RC_FILE)
@@ -42,13 +42,11 @@ local function setup_repl(fifo_dir)
         note("Couldn't load rc file: " .. errmsg)
     end
 
-    local path = fifo_dir .. '/' .. FROM_REPL_FIFO
-    note('Opening from_repl: ' .. path)
-    local from_repl_fd = posix.open(path, posix.O_NONBLOCK)
+    note('Opening from_repl: ' .. FROM_REPL_FIFO)
+    local from_repl_fd = posix.open(FROM_REPL_FIFO, posix.O_NONBLOCK)
 
-    path = fifo_dir .. '/' .. TO_REPL_FIFO
-    note('Opening to_repl: ' .. path)
-    local to_repl_obj = io.open(path, 'w')
+    note('Opening to_repl: ' .. TO_REPL_FIFO)
+    local to_repl_obj = io.open(TO_REPL_FIFO, 'w')
     to_repl_obj:setvbuf 'no'
 
     note 'Connected'
@@ -134,7 +132,7 @@ if minetest then
         params = '',
         description = 'start the Lua REPL',
         func = function(player_name, param)
-            setup_repl(fifo_dir)
+            setup_repl()
             end})
 
 else
@@ -152,7 +150,7 @@ else
             table.insert(minetest.registered_globalsteps, f)
             end}
 
-    setup_repl('.')
+    setup_repl()
 
     while #minetest.registered_globalsteps > 0 do
         for _, f in ipairs(minetest.registered_globalsteps) do

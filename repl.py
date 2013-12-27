@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-import os.path, atexit
+import os, os.path, atexit
 import readline
   # Automatically adds GNU Readline to raw_input.
 
 history_path = os.path.expanduser("~/.mt_repl_history")
 readline.set_history_length(500)
 
-fifo_dir = os.path.expanduser('~/.minetest/mods/mt_repl')
-FROM_MT_FIFO = fifo_dir + '/fifo_mt_to_repl'
-TO_MT_FIFO = fifo_dir + '/fifo_repl_to_mt'
+FROM_MT_FIFO = os.environ['MT_REPL_FIFO_MT_TO_REPL']
+TO_MT_FIFO = os.environ['MT_REPL_FIFO_REPL_TO_MT']
 
 # ----------------------------------------------------------------
 # * Subroutines
