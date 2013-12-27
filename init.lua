@@ -1,20 +1,12 @@
 require 'posix'
 inspect = require 'inspect'
 
+local RC_FILE = os.getenv('HOME') .. '/.mt_replrc'
 local TO_REPL_FIFO = 'fifo_mt_to_repl'
 local FROM_REPL_FIFO = 'fifo_repl_to_mt'
 
 local function note(s)
     minetest.log('info', '[mt_repl] ' .. s)
-end
-
-function len(x)
--- Counts the number of entries in a table.
-    local count = 0
-    for _ in pairs(x) do
-      count = count + 1
-    end
-    return count
 end
 
 local function encode_reply(chunk, errmsg)
@@ -36,7 +28,15 @@ local function encode_reply(chunk, errmsg)
     return reply .. '\n'
 end
 
-function setup_repl(player_name, fifo_dir)
+function setup_repl(fifo_dir)
+
+    note('Loading rc file: ' .. RC_FILE)
+    chunk, errmsg = loadfile(RC_FILE)
+    if chunk then
+        chunk()
+    else
+        note("Couldn't load rc file: " .. errmsg)
+    end
 
     local path = fifo_dir .. '/' .. FROM_REPL_FIFO
     note('Opening from_repl: ' .. path)
@@ -48,12 +48,6 @@ function setup_repl(player_name, fifo_dir)
     to_repl_obj:setvbuf 'no'
 
     note 'Connected'
-
-    -- Define some globals for the REPL user's convenience.
-    if not debugging then
-        mt = minetest
-        p = minetest.get_player_by_name(player_name)
-    end
 
     local tear_down
 
@@ -132,7 +126,7 @@ if minetest then
         params = '',
         description = 'start the Lua REPL',
         func = function(player_name, param)
-            setup_repl(player_name, fifo_dir)
+            setup_repl(fifo_dir)
         end})
 
 else
@@ -150,7 +144,7 @@ else
             table.insert(minetest.registered_globalsteps, f)
             end}
 
-    setup_repl(nil, '.')
+    setup_repl('.')
 
     while #minetest.registered_globalsteps > 0 do
         for _, f in ipairs(minetest.registered_globalsteps) do
