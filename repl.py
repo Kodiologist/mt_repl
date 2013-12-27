@@ -36,6 +36,11 @@ with open(TO_MT_FIFO, 'w') as to_mt, open(FROM_MT_FIFO, 'r') as from_mt:
         except EOFError:
             break
 
+        if inp == 'quit':
+            # Remove the 'quit' from the history.
+            readline.remove_history_item(readline.get_current_history_length() - 1)
+            break
+
         print >>to_mt, inp
         to_mt.flush()
 
