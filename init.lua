@@ -5,6 +5,10 @@ local RC_FILE = os.getenv('HOME') .. '/.mt_replrc'
 local TO_REPL_FIFO = 'fifo_mt_to_repl'
 local FROM_REPL_FIFO = 'fifo_repl_to_mt'
 
+-----------------------------------------------------------------
+-- * Subroutines
+-----------------------------------------------------------------
+
 local function note(s)
     minetest.log('info', '[mt_repl] ' .. s)
 end
@@ -23,12 +27,12 @@ local function encode_reply(chunk, errmsg)
     end
 
     -- Encode internal newlines and add a terminating newline.
-    reply = reply:gsub('\\', '\\\\')
-    reply = reply:gsub('\n', '\\n')
+    reply = reply:gsub('@', '@@')
+    reply = reply:gsub('\n', '@n')
     return reply .. '\n'
 end
 
-function setup_repl(fifo_dir)
+local function setup_repl(fifo_dir)
 
     note('Loading rc file: ' .. RC_FILE)
     chunk, errmsg = loadfile(RC_FILE)
@@ -117,6 +121,10 @@ function setup_repl(fifo_dir)
     return tear_down
 end
 
+-----------------------------------------------------------------
+-- * Mainline code
+-----------------------------------------------------------------
+
 if minetest then
 
     debugging = false
@@ -127,7 +135,7 @@ if minetest then
         description = 'start the Lua REPL',
         func = function(player_name, param)
             setup_repl(fifo_dir)
-        end})
+            end})
 
 else
 

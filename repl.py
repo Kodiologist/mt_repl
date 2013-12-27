@@ -11,16 +11,24 @@ fifo_dir = os.path.expanduser('~/.minetest/mods/mt_repl')
 FROM_MT_FIFO = fifo_dir + '/fifo_mt_to_repl'
 TO_MT_FIFO = fifo_dir + '/fifo_repl_to_mt'
 
+# ----------------------------------------------------------------
+# * Subroutines
+# ----------------------------------------------------------------
+
 def decode_reply(reply):
     # Strip trailing newline and decode internal newlines.
     reply = reply[:-1]
-    reply = reply.replace('\\n', '\n')
-    reply = reply.replace('\\\\', '\\')
+    reply = reply.replace('@n', '\n')
+    reply = reply.replace('@@', '@')
     
     if reply == 'nil':
         return None
     else:
         return reply
+
+# ----------------------------------------------------------------
+# * Mainline code
+# ----------------------------------------------------------------
 
 try:
     readline.read_history_file(history_path)
@@ -34,11 +42,13 @@ with open(TO_MT_FIFO, 'w') as to_mt, open(FROM_MT_FIFO, 'r') as from_mt:
         try:
             inp = raw_input('~~> ')
         except EOFError:
+            # The user hit Control-D, so quit.
             break
 
-        if inp == 'quit':
+        if inp.strip(' ;') == 'quit':
             # Remove the 'quit' from the history.
             readline.remove_history_item(readline.get_current_history_length() - 1)
+            # Now actually quit.
             break
 
         print >>to_mt, inp
