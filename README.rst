@@ -50,6 +50,8 @@ When the mod is enabled, use the chat command ``/repl`` in-game, then run the in
 
 To quit from the Python script, hit Control-D to signal EOF or enter the special input ``quit``. This will also terminate the REPL on the Minetest side, so you'll restart it (by saying ``/repl``) if you want to use it again.
 
+If you put a Lua script named ``.mt_replrc`` in your home directory, it will be run each time the REPL starts up. See ``rc-example.lua``.
+
 License
 ============================================================
 
