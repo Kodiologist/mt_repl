@@ -15,10 +15,6 @@ def decode_reply(reply):
     
     if reply == 'nil':
         return None
-    elif reply.startswith('number: '):
-        return reply[len('number: '):]
-    elif reply.startswith('string: '):
-        return repr(reply[len('string: '):])
     else:
         return reply
 

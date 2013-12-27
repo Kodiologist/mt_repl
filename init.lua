@@ -1,4 +1,5 @@
 require 'posix'
+inspect = require 'inspect'
 
 local TO_REPL_FIFO = 'fifo_mt_to_repl'
 local FROM_REPL_FIFO = 'fifo_repl_to_mt'
@@ -17,7 +18,6 @@ function len(x)
 end
 
 local function encode_reply(chunk, errmsg)
--- Types: 'nil' 'number' 'string' 'boolean' 'table' 'function' 'thread' 'userdata'
 
     if not chunk then
         reply = 'Parse error: ' .. errmsg
@@ -25,16 +25,8 @@ local function encode_reply(chunk, errmsg)
         succeeded, v = pcall(chunk)
         if not succeeded then
             reply = 'Runtime error: ' .. v
-        elseif type(v) == 'table' then
-            reply = string.format('%s (%d entr%s)',
-                tostring(v), len(v),
-                len(v) == 1 and 'y' or 'ies')
-        elseif type(v) == 'number' then
-            reply = 'number: ' .. v
-        elseif type(v) == 'string' then
-            reply = 'string: ' .. v
         else
-            reply = tostring(v)
+            reply = inspect(v, {depth = 1})
         end
     end
 
