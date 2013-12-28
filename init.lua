@@ -98,6 +98,8 @@ local function setup_repl()
                 -- Hack: We remove all the 'local' declarations
                 -- in the generated Lua so that assignments go to
                 -- global variables by default, as in plain Lua.
+                -- As a side-effect, this also removes any
+                -- 'local' declarations the user actually typed.
                 local tree
                 tree, errmsg = moonscript.parse.string(inp)
                 if tree then

@@ -24,7 +24,7 @@ Caveats
 - I've only tested it in single-player mode. There is no sandboxing. **Don't enable this mod on a multiplayer server if you don't trust the other players not to erase your home directory.**
 - Multi-line commands aren't allowed.
 - ``print`` will use the Minetest server's standard output, which isn't the terminal you're looking at while you're using the REPL.
-- In MoonScript, creating local variables is not possible.
+- In MoonScript, creating local variables is not possible. Even ``local`` declarations don't work.
 
 Installation
 ============================================================
