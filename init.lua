@@ -156,7 +156,7 @@ else
         for _, f in ipairs(minetest.registered_globalsteps) do
             f(1)
         end
-        posix.sleep(1)
+        posix.nanosleep(0, 1e8) -- .1 seconds
     end
 
     note 'Exiting'
