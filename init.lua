@@ -5,6 +5,8 @@ local RC_FILE = os.getenv('HOME') .. '/.mt_replrc'
 local TO_REPL_FIFO = os.getenv 'MT_REPL_FIFO_MT_TO_REPL'
 local FROM_REPL_FIFO = os.getenv 'MT_REPL_FIFO_REPL_TO_MT'
 
+mt_repl_use_moonscript = false
+
 -----------------------------------------------------------------
 -- * Subroutines
 -----------------------------------------------------------------
@@ -16,7 +18,7 @@ end
 local function encode_reply(chunk, errmsg)
 
     if not chunk then
-        reply = 'Parse error: ' .. errmsg
+        reply = errmsg
     else
         succeeded, v = pcall(chunk)
         if not succeeded then
@@ -35,11 +37,20 @@ end
 local function setup_repl()
 
     note('Loading rc file: ' .. RC_FILE)
-    chunk, errmsg = loadfile(RC_FILE)
-    if chunk then
-        chunk()
-    else
-        note("Couldn't load rc file: " .. errmsg)
+    do
+        local chunk, errmsg = loadfile(RC_FILE)
+        if chunk then
+            chunk()
+        else
+            note("Couldn't load rc file: " .. errmsg)
+        end
+    end
+
+    local moonscript
+    if mt_repl_use_moonscript then
+        moonscript = {
+            parse = require 'moonscript.parse',
+            compile = require 'moonscript.compile'}
     end
 
     note('Opening from_repl: ' .. FROM_REPL_FIFO)
@@ -81,14 +92,43 @@ local function setup_repl()
             -- Remove the trailing newline.
             inp = inp:sub(1, -2)
 
-            note('Loading: ' .. inp)
-            -- Hack: We attempt to automatically promote
-            -- expressions to statements by first trying to read
-            -- the input with a prepended 'return', and trying to
-            -- read the input as-is if that doesn't parse.
-            chunk, errmsg = loadstring('return ' .. inp, '(i)')
-            if not chunk then
-                chunk, errmsg = loadstring(inp, '(i)')
+            local chunk, errmsg
+            if mt_repl_use_moonscript then
+                note('Loading MoonScript: ' .. inp)
+                -- Hack: We remove all the 'local' declarations
+                -- in the generated Lua so that assignments go to
+                -- global variables by default, as in plain Lua.
+                local tree
+                tree, errmsg = moonscript.parse.string(inp)
+                if tree then
+                    local lua_code, pos
+                    lua_code, err, pos = moonscript.compile.tree(tree)
+                    if lua_code then
+                        lua_code = lua_code:gsub('^local%s+', ''):gsub('(\n *)local%s+', '%1')
+                        chunk, errmsg = loadstring(lua_code, '(i)')
+                        if errmsg then
+                            errmsg = 'Generated-Lua parse error: ' .. errmsg
+                        end
+                    else
+                        errmsg = 'MoonScript compilation error: ' .. moonscript.compile.format_error(errmsg, pos, inp)
+                    end
+                else
+                     errmsg = 'MoonScript parse error: ' .. errmsg
+                end
+            else
+                note('Loading Lua: ' .. inp)
+                -- Hack: We attempt to automatically promote
+                -- expressions to statements by first trying to
+                -- read the input with a prepended 'return', and
+                -- trying to read the input as-is if that doesn't
+                -- parse.
+                chunk, errmsg = loadstring('return ' .. inp, '(i)')
+                if not chunk then
+                    chunk, errmsg = loadstring(inp, '(i)')
+                end
+                if errmsg then
+                    errmsg = 'Lua parse error: ' .. errmsg
+                end
             end
 
             note 'Sending reply'

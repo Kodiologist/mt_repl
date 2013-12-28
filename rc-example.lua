@@ -1,3 +1,5 @@
+mt_repl_use_moonscript = false
+
 if not debugging then
     mt = minetest
     p = minetest.get_player_by_name('singleplayer')

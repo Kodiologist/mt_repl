@@ -15,6 +15,7 @@ Features
 
 - GNU Readline support (including persistent history)
 - Custom startup files
+- A `MoonScript`_ input mode, with assignment to global variables by default (as in plain Lua)
 
 Caveats
 ============================================================
@@ -23,6 +24,7 @@ Caveats
 - I've only tested it in single-player mode. There is no sandboxing. **Don't enable this mod on a multiplayer server if you don't trust the other players not to erase your home directory.**
 - Multi-line commands aren't allowed.
 - ``print`` will use the Minetest server's standard output, which isn't the terminal you're looking at while you're using the REPL.
+- In MoonScript, creating local variables is not possible.
 
 Installation
 ============================================================
@@ -52,6 +54,10 @@ To quit from the Python script, hit Control-D to signal EOF or enter the special
 
 If you put a Lua script named ``.mt_replrc`` in your home directory, it will be run each time the REPL starts up. See ``rc-example.lua``.
 
+To use MoonScript instead of Lua, set ``mt_repl_use_moonscript = true`` in your ``.mt_replrc`` (``.mt_replrc`` itself must still be in Lua). Here's a hint for writing MoonScript one-liners: you can squeeze multiple statements into a place where only one is allowed by abusing ``do`` like so::
+
+    if 1 + 1 == 2 then do a = 1, do b = 2 else c = 3
+
 License
 ============================================================
 
@@ -63,6 +69,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 .. _Minetest: http://minetest.net
 .. _`read–eval–print loop`: http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop
+.. _MoonScript: http://moonscript.org/
 .. _luaposix: http://luaforge.net/projects/luaposix/
 .. _inspect.lua: https://github.com/kikito/inspect.lua
 .. _`Install the mod`: http://wiki.minetest.net/Installing_Mods
