@@ -31,7 +31,7 @@ Installation
 
 Minetest versions 0.4.7 and later should be supported.
 
-- Install the Lua modules `luaposix`_ and `inspect.lua`_. (luaposix is also available as the Debian package ``lua-posix``.)
+- Install the Lua modules `luaposix`_ and `inspect.lua`_. (luaposix is also available as the Debian package ``lua-posix``.) MoonScript is optional.
 - `Install the mod`_ like an ordinary Minetest mod. 
 - Set the environment variables ``MT_REPL_FIFO_REPL_TO_MT`` and ``MT_REPL_FIFO_MT_TO_REPL`` to the paths of a pair of named pipes. I recommend doing this by putting
 
