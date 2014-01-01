@@ -17,10 +17,11 @@ end
 
 local function encode_reply(chunk, errmsg)
 
+    local reply
     if not chunk then
         reply = errmsg
     else
-        succeeded, v = pcall(chunk)
+        local succeeded, v = pcall(chunk)
         if not succeeded then
             reply = 'Runtime error: ' .. v
         else
@@ -104,7 +105,7 @@ local function setup_repl()
                 tree, errmsg = moonscript.parse.string(inp)
                 if tree then
                     local lua_code, pos
-                    lua_code, err, pos = moonscript.compile.tree(tree)
+                    lua_code, errmsg, pos = moonscript.compile.tree(tree)
                     if lua_code then
                         lua_code = lua_code
                             :gsub('^local%s+%S+\n', '')
@@ -171,7 +172,7 @@ end
 
 if minetest then
 
-    debugging = false
+    mt_repl_debugging = false
 
     local fifo_dir = minetest.get_modpath(minetest.get_current_modname())
     minetest.register_chatcommand('repl', {
@@ -184,7 +185,7 @@ if minetest then
 else
 
     -- This file is being executed directly for debugging.
-    debugging = true
+    mt_repl_debugging = true
 
     -- Set up a mock Minetest object.
     minetest = {
