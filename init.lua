@@ -106,7 +106,11 @@ local function setup_repl()
                     local lua_code, pos
                     lua_code, err, pos = moonscript.compile.tree(tree)
                     if lua_code then
-                        lua_code = lua_code:gsub('^local%s+', ''):gsub('(\n *)local%s+', '%1')
+                        lua_code = lua_code
+                            :gsub('^local%s+%S+\n', '')
+                            :gsub('(\n *)local%s+%S+\n', '%1')
+                            :gsub('^local%s+', '')
+                            :gsub('(\n *)local%s+', '%1')
                         chunk, errmsg = loadstring(lua_code, '(i)')
                         if errmsg then
                             errmsg = 'Generated-Lua parse error: ' .. errmsg
